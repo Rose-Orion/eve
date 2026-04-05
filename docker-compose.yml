@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  orchestrator:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file: .env
+    depends_on:
+      - redis
+    volumes:
+      - workspace_data:/app/workspaces
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  workspace_data:
+  redis_data:

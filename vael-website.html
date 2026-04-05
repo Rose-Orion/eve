@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vael — Nothing hidden. Everything works.</title>
+<meta name="description" content="Vael is clean skincare built on radical transparency. Three products. Every ingredient explained. Every claim cited.">
+<meta property="og:title" content="Vael — Clean skincare, radically transparent.">
+<meta property="og:description" content="Three products. Every ingredient explained. Every claim cited. Nothing hidden.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; overflow-x: hidden; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: #0a0a0a;
+  color: #e8e4df;
+  overflow-x: hidden;
+  cursor: default;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+::selection { background: rgba(200, 175, 150, 0.3); color: #fff; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+/* ── CUSTOM CURSOR ───────────────────────────── */
+.cursor { position: fixed; width: 20px; height: 20px; border: 1.5px solid rgba(200,175,150,0.6); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, border-color 0.3s, background 0.3s; mix-blend-mode: difference; }
+.cursor.hover { width: 60px; height: 60px; background: rgba(200,175,150,0.08); border-color: rgba(200,175,150,0.9); }
+
+/* ── GRAIN OVERLAY ───────────────────────────── */
+.grain { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; z-index: 9998; pointer-events: none; opacity: 0.035; }
+.grain::after { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); animation: grain 0.5s steps(1) infinite; }
+@keyframes grain { 0%, 100% { transform: translate(0,0); } 10% { transform: translate(-5%,-10%); } 30% { transform: translate(3%,5%); } 50% { transform: translate(-8%,2%); } 70% { transform: translate(5%,-5%); } 90% { transform: translate(-3%,8%); } }
+
+/* ── SCROLL PROGRESS ─────────────────────────── */
+.scroll-progress { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(90deg, #c8af96, #a08672); z-index: 9999; width: 0%; transition: width 0.1s linear; }
+
+/* ── NAV ─────────────────────────────────────── */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 28px 48px; display: flex; justify-content: space-between; align-items: center; mix-blend-mode: difference; transition: opacity 0.5s; }
+nav .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; }
+nav .nav-links { display: flex; gap: 36px; }
+nav .nav-links a { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 400; opacity: 0.7; transition: opacity 0.4s; }
+nav .nav-links a:hover { opacity: 1; }
+
+/* ── REVEAL ANIMATIONS ───────────────────────── */
+.reveal { opacity: 0; transform: translateY(60px); transition: opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.15s; }
+.reveal-delay-2 { transition-delay: 0.3s; }
+.reveal-delay-3 { transition-delay: 0.45s; }
+.reveal-delay-4 { transition-delay: 0.6s; }
+
+.reveal-line { display: inline-block; overflow: hidden; }
+.reveal-line span { display: inline-block; transform: translateY(105%); transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.reveal-line.visible span { transform: translateY(0); }
+
+.reveal-mask { clip-path: inset(0 100% 0 0); transition: clip-path 1.4s cubic-bezier(0.77, 0, 0.175, 1); }
+.reveal-mask.visible { clip-path: inset(0 0% 0 0); }
+
+/* ── HERO ────────────────────────────────────── */
+.hero { position: relative; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; overflow: hidden; }
+.hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, #1a1614 0%, #0d0b0a 50%, #0a0a0a 100%); }
+.hero-bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 60%, rgba(180, 150, 120, 0.04) 0%, transparent 50%), radial-gradient(circle at 70% 30%, rgba(200, 175, 150, 0.03) 0%, transparent 50%); }
+.hero-glow { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(180, 150, 120, 0.06) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: pulse 8s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.6; } }
+
+.hero-content { position: relative; z-index: 2; max-width: 900px; padding: 0 24px; }
+.hero-eyebrow { font-size: 0.68rem; letter-spacing: 0.35em; text-transform: uppercase; color: #c8af96; margin-bottom: 40px; font-weight: 400; }
+.hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(3.2rem, 8vw, 7rem); font-weight: 300; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 32px; color: #f0ece6; }
+.hero h1 em { font-style: italic; font-weight: 300; color: #c8af96; }
+.hero-sub { font-size: 1rem; line-height: 1.7; color: rgba(232, 228, 223, 0.5); max-width: 480px; margin: 0 auto 48px; font-weight: 300; }
+.hero-cta { display: inline-flex; align-items: center; gap: 12px; padding: 16px 40px; border: 1px solid rgba(200, 175, 150, 0.3); color: #e8e4df; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); position: relative; overflow: hidden; }
+.hero-cta::before { content: ''; position: absolute; inset: 0; background: rgba(200, 175, 150, 0.08); transform: scaleX(0); transform-origin: left; transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.hero-cta:hover::before { transform: scaleX(1); }
+.hero-cta:hover { border-color: rgba(200, 175, 150, 0.6); }
+.hero-cta svg { width: 16px; transition: transform 0.4s; }
+.hero-cta:hover svg { transform: translateX(4px); }
+
+.hero-scroll { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.hero-scroll span { font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(200,175,150,0.4); }
+.scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, rgba(200,175,150,0.4), transparent); animation: scrollDown 2s ease-in-out infinite; }
+@keyframes scrollDown { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+/* ── MARQUEE ─────────────────────────────────── */
+.marquee-section { padding: 32px 0; border-top: 1px solid rgba(200,175,150,0.08); border-bottom: 1px solid rgba(200,175,150,0.08); overflow: hidden; }
+.marquee-track { display: flex; animation: marquee 30s linear infinite; width: max-content; }
+.marquee-track span { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 300; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(200,175,150,0.25); white-space: nowrap; padding: 0 32px; }
+.marquee-track span::after { content: '·'; margin-left: 32px; }
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ── PHILOSOPHY ──────────────────────────────── */
+.philosophy { padding: 180px 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 120px; align-items: center; max-width: 1400px; margin: 0 auto; }
+.philosophy-left .section-label { font-size: 0.65rem; letter-spacing: 0.35em; text-transform: uppercase; color: #c8af96; margin-bottom: 40px; display: block; }
+.philosophy-left h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.8rem, 5vw, 4.5rem); font-weight: 300; line-height: 1.1; color: #f0ece6; }
+.philosophy-right { padding-top: 40px; }
+.philosophy-right p { font-size: 0.95rem; line-height: 1.85; color: rgba(232, 228, 223, 0.55); font-weight: 300; margin-bottom: 24px; }
+.philosophy-right p:last-child { margin-bottom: 0; }
+
+.divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, rgba(200,175,150,0.12), transparent); margin: 0; }
+
+/* ── PRODUCTS ─ HORIZONTAL SCROLL ────────────── */
+.products-section { padding: 160px 0 120px; }
+.products-header { max-width: 1400px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: flex-end; }
+.products-header h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem, 4vw, 3.6rem); font-weight: 300; line-height: 1.1; color: #f0ece6; }
+.products-header .product-count { font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(200,175,150,0.4); }
+
+.products-scroll { display: flex; gap: 32px; padding: 0 48px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; }
+.products-scroll::-webkit-scrollbar { display: none; }
+
+.product-card { flex: 0 0 420px; scroll-snap-align: start; position: relative; }
+.product-image { aspect-ratio: 3/4; background: #151311; border-radius: 4px; overflow: hidden; position: relative; margin-bottom: 28px; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.product-card:hover .product-image { transform: scale(0.98); }
+.product-image .step-badge { position: absolute; top: 24px; left: 24px; font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: #c8af96; background: rgba(10,10,10,0.7); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 2px; }
+.product-image .product-visual { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.product-image .product-visual .circle { width: 200px; height: 200px; border-radius: 50%; border: 1px solid rgba(200,175,150,0.1); position: relative; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.product-card:hover .product-visual .circle { border-color: rgba(200,175,150,0.2); transform: scale(1.05); }
+.product-visual .circle::after { content: ''; position: absolute; inset: 20px; border-radius: 50%; background: radial-gradient(circle, rgba(180,150,120,0.08) 0%, transparent 70%); }
+.product-visual .ingredient-count { position: absolute; bottom: 50%; left: 50%; transform: translate(-50%, 50%); font-family: 'Cormorant Garamond', serif; font-size: 4rem; font-weight: 300; color: rgba(200,175,150,0.15); }
+.product-name { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 400; color: #f0ece6; margin-bottom: 6px; }
+.product-meta { font-size: 0.75rem; color: rgba(200,175,150,0.4); letter-spacing: 0.1em; margin-bottom: 16px; }
+.product-desc { font-size: 0.85rem; line-height: 1.7; color: rgba(232,228,223,0.45); font-weight: 300; max-width: 360px; }
+
+/* ── INGREDIENT STRIP ────────────────────────── */
+.ingredient-strip { padding: 120px 48px; max-width: 1400px; margin: 0 auto; }
+.ingredient-strip h3 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 300; line-height: 1.2; color: #f0ece6; text-align: center; margin-bottom: 80px; }
+.ingredient-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(200,175,150,0.06); }
+.ingredient-cell { background: #0a0a0a; padding: 48px 40px; transition: background 0.5s; }
+.ingredient-cell:hover { background: #0f0d0c; }
+.ingredient-cell .ing-name { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; color: #c8af96; margin-bottom: 12px; }
+.ingredient-cell .ing-pct { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(200,175,150,0.3); margin-bottom: 16px; }
+.ingredient-cell .ing-desc { font-size: 0.82rem; line-height: 1.7; color: rgba(232,228,223,0.4); font-weight: 300; }
+
+/* ── TESTIMONIALS ────────────────────────────── */
+.testimonials { padding: 160px 48px; max-width: 1200px; margin: 0 auto; text-align: center; }
+.testimonials .section-label { font-size: 0.65rem; letter-spacing: 0.35em; text-transform: uppercase; color: #c8af96; margin-bottom: 60px; display: block; }
+.testimonial-slider { position: relative; min-height: 280px; }
+.testimonial-item { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.8s, transform 0.8s; transform: translateY(20px); }
+.testimonial-item.active { opacity: 1; transform: translateY(0); }
+.testimonial-item blockquote { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.5rem, 3vw, 2.4rem); font-weight: 300; line-height: 1.5; color: rgba(240, 236, 230, 0.8); font-style: italic; max-width: 700px; margin-bottom: 32px; }
+.testimonial-item cite { font-style: normal; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(200,175,150,0.4); }
+.testimonial-dots { display: flex; gap: 12px; justify-content: center; margin-top: 48px; }
+.testimonial-dots button { width: 8px; height: 8px; border-radius: 50%; border: 1px solid rgba(200,175,150,0.3); background: transparent; cursor: pointer; transition: all 0.4s; padding: 0; }
+.testimonial-dots button.active { background: #c8af96; border-color: #c8af96; }
+
+/* ── NEWSLETTER ──────────────────────────────── */
+.newsletter { padding: 160px 48px; text-align: center; position: relative; overflow: hidden; }
+.newsletter::before { content: ''; position: absolute; top: 50%; left: 50%; width: 800px; height: 800px; border-radius: 50%; background: radial-gradient(circle, rgba(180,150,120,0.04) 0%, transparent 60%); transform: translate(-50%, -50%); }
+.newsletter h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 300; line-height: 1.15; color: #f0ece6; margin-bottom: 20px; position: relative; }
+.newsletter .nl-sub { font-size: 0.9rem; color: rgba(232,228,223,0.45); font-weight: 300; margin-bottom: 48px; position: relative; }
+.newsletter-form { display: flex; max-width: 460px; margin: 0 auto; position: relative; border-bottom: 1px solid rgba(200,175,150,0.2); }
+.newsletter-form input { flex: 1; background: transparent; border: none; outline: none; color: #e8e4df; font-family: 'Inter', sans-serif; font-size: 0.85rem; padding: 16px 0; letter-spacing: 0.05em; }
+.newsletter-form input::placeholder { color: rgba(200,175,150,0.3); }
+.newsletter-form button { background: transparent; border: none; color: #c8af96; font-family: 'Inter', sans-serif; font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase; cursor: pointer; padding: 16px 0 16px 24px; transition: color 0.4s; }
+.newsletter-form button:hover { color: #f0ece6; }
+
+/* ── FOOTER ──────────────────────────────────── */
+footer { padding: 80px 48px 40px; border-top: 1px solid rgba(200,175,150,0.06); }
+.footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 48px; max-width: 1400px; margin: 0 auto 80px; }
+.footer-brand .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: #f0ece6; margin-bottom: 16px; }
+.footer-brand p { font-size: 0.8rem; line-height: 1.7; color: rgba(232,228,223,0.3); font-weight: 300; max-width: 280px; }
+.footer-links h4 { font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(200,175,150,0.4); margin-bottom: 24px; }
+.footer-links a { display: block; font-size: 0.82rem; color: rgba(232,228,223,0.4); margin-bottom: 12px; transition: color 0.3s; font-weight: 300; }
+.footer-links a:hover { color: #c8af96; }
+.footer-bottom { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding-top: 32px; border-top: 1px solid rgba(200,175,150,0.06); }
+.footer-bottom span { font-size: 0.68rem; color: rgba(232,228,223,0.2); letter-spacing: 0.05em; }
+
+/* ── RESPONSIVE ──────────────────────────────── */
+@media (max-width: 768px) {
+  nav { padding: 20px 24px; }
+  .philosophy { grid-template-columns: 1fr; gap: 48px; padding: 100px 24px; }
+  .products-header { flex-direction: column; align-items: flex-start; gap: 16px; padding: 0 24px 48px; }
+  .product-card { flex: 0 0 85vw; }
+  .products-scroll { padding: 0 24px; }
+  .ingredient-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .newsletter { padding: 100px 24px; }
+  .testimonials { padding: 100px 24px; }
+  .ingredient-strip { padding: 80px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Grain overlay -->
+<div class="grain"></div>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+
+<!-- Scroll progress -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- Navigation -->
+<nav>
+  <div class="logo">Vael</div>
+  <div class="nav-links">
+    <a href="#philosophy">Philosophy</a>
+    <a href="#collection">Collection</a>
+    <a href="#ingredients">Ingredients</a>
+    <a href="#join">Join</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow reveal reveal-delay-1">Clean skincare, radically transparent</div>
+    <h1>
+      <span class="reveal-line"><span>Nothing between</span></span><br>
+      <span class="reveal-line reveal-delay-1"><span>you and <em>clarity.</em></span></span>
+    </h1>
+    <p class="hero-sub reveal reveal-delay-2">Three products. Every ingredient explained. Every claim cited. Skincare that respects your intelligence.</p>
+    <a href="#collection" class="hero-cta reveal reveal-delay-3">
+      <span>Explore the routine</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span>No fragrance</span><span>No filler actives</span><span>No trace amounts</span><span>No proprietary blends</span><span>Every claim cited</span><span>Seven to nine ingredients</span><span>pH-balanced</span><span>Dermatologist reviewed</span>
+    <span>No fragrance</span><span>No filler actives</span><span>No trace amounts</span><span>No proprietary blends</span><span>Every claim cited</span><span>Seven to nine ingredients</span><span>pH-balanced</span><span>Dermatologist reviewed</span>
+  </div>
+</div>
+
+<!-- Philosophy -->
+<section class="philosophy" id="philosophy">
+  <div class="philosophy-left">
+    <span class="section-label reveal">Our philosophy</span>
+    <h2 class="reveal reveal-delay-1">The label should<br>be the <em>whole</em><br>story.</h2>
+  </div>
+  <div class="philosophy-right">
+    <p class="reveal reveal-delay-2">Most skincare brands treat transparency as a marketing claim — a sentence in their About section. At Vael, transparency is structural. Every ingredient is listed in plain language before you add to cart. Every efficacy percentage matches the published study it references.</p>
+    <p class="reveal reveal-delay-3">We built Vael because the gap between lab and label had grown too wide. Proprietary blends hide what's inside. "Clinically tested" rarely says by whom. The word "clean" has no legal definition. We decided the simplest fix was also the most radical: just show everything.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Products -->
+<section class="products-section" id="collection">
+  <div class="products-header">
+    <h2 class="reveal">A complete routine.<br>Nothing extra.</h2>
+    <span class="product-count reveal reveal-delay-1">3 products / 21 ingredients</span>
+  </div>
+  <div class="products-scroll">
+    <div class="product-card reveal">
+      <div class="product-image">
+        <span class="step-badge">Step 01 — Cleanse</span>
+        <div class="product-visual">
+          <div class="circle"></div>
+          <span class="ingredient-count">7</span>
+        </div>
+      </div>
+      <h3 class="product-name">Vael Gentle Cleanser</h3>
+      <span class="product-meta">$38 · 75ml</span>
+      <p class="product-desc">Mild surfactants that remove what shouldn't be on your skin without stripping what should. Seven ingredients. No fragrance. pH-balanced to protect your acid mantle.</p>
+    </div>
+    <div class="product-card reveal reveal-delay-1">
+      <div class="product-image">
+        <span class="step-badge">Step 02 — Treat</span>
+        <div class="product-visual">
+          <div class="circle"></div>
+          <span class="ingredient-count">5</span>
+        </div>
+      </div>
+      <h3 class="product-name">Vael Clarity Serum</h3>
+      <span class="product-meta">$48 · 30ml</span>
+      <p class="product-desc">2% niacinamide and 2% bakuchiol at study-matched concentrations. Retinol-comparable results without irritation. Five ingredients — each one cited.</p>
+    </div>
+    <div class="product-card reveal reveal-delay-2">
+      <div class="product-image">
+        <span class="step-badge">Step 03 — Protect</span>
+        <div class="product-visual">
+          <div class="circle"></div>
+          <span class="ingredient-count">9</span>
+        </div>
+      </div>
+      <h3 class="product-name">Vael Barrier Moisturizer</h3>
+      <span class="product-meta">$44 · 50ml</span>
+      <p class="product-desc">Squalane and sodium hyaluronate support the barrier your skin already builds. No silicone fillers. No synthetic fragrance. Nine ingredients total.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Ingredients -->
+<section class="ingredient-strip" id="ingredients">
+  <h3 class="reveal">Every ingredient, explained.</h3>
+  <div class="ingredient-grid">
+    <div class="ingredient-cell reveal">
+      <div class="ing-name">Niacinamide</div>
+      <div class="ing-pct">2% concentration</div>
+      <p class="ing-desc">Vitamin B3. Reduces inflammation, supports skin barrier function, and minimizes pore appearance. Published in the Journal of Cosmetic Dermatology, 2019.</p>
+    </div>
+    <div class="ingredient-cell reveal reveal-delay-1">
+      <div class="ing-name">Bakuchiol</div>
+      <div class="ing-pct">2% concentration</div>
+      <p class="ing-desc">Plant-derived retinol alternative. Comparable anti-aging results without photosensitivity. British Journal of Dermatology, 2019.</p>
+    </div>
+    <div class="ingredient-cell reveal reveal-delay-2">
+      <div class="ing-name">Squalane</div>
+      <div class="ing-pct">Olive-derived</div>
+      <p class="ing-desc">Lightweight emollient identical to human sebum. Non-comedogenic. Reinforces lipid barrier without occlusion.</p>
+    </div>
+    <div class="ingredient-cell reveal reveal-delay-3">
+      <div class="ing-name">Sodium Hyaluronate</div>
+      <div class="ing-pct">Low molecular weight</div>
+      <p class="ing-desc">Penetrates deeper than standard hyaluronic acid. Binds 1000x its weight in water within the dermis.</p>
+    </div>
+    <div class="ingredient-cell reveal reveal-delay-2">
+      <div class="ing-name">Cocamidopropyl Betaine</div>
+      <div class="ing-pct">Primary surfactant</div>
+      <p class="ing-desc">Coconut-derived cleanser. Gentle enough for eczema-prone skin. Maintains skin pH at 5.5.</p>
+    </div>
+    <div class="ingredient-cell reveal reveal-delay-3">
+      <div class="ing-name">Tocopherol</div>
+      <div class="ing-pct">Vitamin E</div>
+      <p class="ing-desc">Antioxidant that protects against free radical damage. Works synergistically with niacinamide for enhanced efficacy.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Testimonials -->
+<section class="testimonials">
+  <span class="section-label reveal">What people notice</span>
+  <div class="testimonial-slider reveal reveal-delay-1">
+    <div class="testimonial-item active">
+      <blockquote>"I have reactive skin and I've tried every 'gentle' cleanser on the market. Most of them aren't gentle. This one actually is. My skin stopped overcompensating within a week."</blockquote>
+      <cite>Mara S., 31 — Portland</cite>
+    </div>
+    <div class="testimonial-item">
+      <blockquote>"The ingredient list is five items long. I checked every one. They all belong there. I've never been able to say that about a serum before."</blockquote>
+      <cite>Priya K., 34 — Brooklyn</cite>
+    </div>
+    <div class="testimonial-item">
+      <blockquote>"What sold me was the cost breakdown on the product page. No brand does that. It made me trust everything else they say."</blockquote>
+      <cite>Claire T., 29 — Austin</cite>
+    </div>
+  </div>
+  <div class="testimonial-dots">
+    <button class="active" data-index="0"></button>
+    <button data-index="1"></button>
+    <button data-index="2"></button>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Newsletter -->
+<section class="newsletter" id="join">
+  <h2 class="reveal">You read labels.<br>We built a brand<br>for <em>that.</em></h2>
+  <p class="nl-sub reveal reveal-delay-1">Ingredient deep-dives, formulation updates, and early access. No hype. No spam.</p>
+  <form class="newsletter-form reveal reveal-delay-2" onsubmit="return false;">
+    <input type="email" placeholder="Your email address" required>
+    <button type="submit">Subscribe</button>
+  </form>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">Vael</div>
+      <p>Nothing hidden. Everything works. Clean skincare built on radical transparency.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Navigate</h4>
+      <a href="#philosophy">Philosophy</a>
+      <a href="#collection">Collection</a>
+      <a href="#ingredients">Ingredients</a>
+      <a href="#join">Newsletter</a>
+    </div>
+    <div class="footer-links">
+      <h4>Connect</h4>
+      <a href="#">Instagram</a>
+      <a href="#">TikTok</a>
+      <a href="#">LinkedIn</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2025 Vael. Nothing between you and clarity.</span>
+    <span>Made with intention.</span>
+  </div>
+</footer>
+
+<script>
+// ── CUSTOM CURSOR ──────────────────────────────
+const cursor = document.getElementById('cursor');
+let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+});
+
+function animateCursor() {
+  cursorX += (mouseX - cursorX) * 0.12;
+  cursorY += (mouseY - cursorY) * 0.12;
+  cursor.style.left = cursorX + 'px';
+  cursor.style.top = cursorY + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+document.querySelectorAll('a, button, .product-card, .ingredient-cell').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+});
+
+// ── SCROLL PROGRESS ────────────────────────────
+const scrollProgress = document.getElementById('scrollProgress');
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  scrollProgress.style.width = (scrollTop / docHeight * 100) + '%';
+});
+
+// ── INTERSECTION OBSERVER ──────────────────────
+const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -60px 0px' };
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.reveal, .reveal-line, .reveal-mask').forEach(el => {
+  observer.observe(el);
+});
+
+// ── TESTIMONIAL SLIDER ─────────────────────────
+const testimonials = document.querySelectorAll('.testimonial-item');
+const dots = document.querySelectorAll('.testimonial-dots button');
+let currentTestimonial = 0;
+let testimonialInterval;
+
+function showTestimonial(index) {
+  testimonials.forEach(t => t.classList.remove('active'));
+  dots.forEach(d => d.classList.remove('active'));
+  testimonials[index].classList.add('active');
+  dots[index].classList.add('active');
+  currentTestimonial = index;
+}
+
+function nextTestimonial() {
+  showTestimonial((currentTestimonial + 1) % testimonials.length);
+}
+
+dots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    clearInterval(testimonialInterval);
+    showTestimonial(parseInt(dot.dataset.index));
+    testimonialInterval = setInterval(nextTestimonial, 5000);
+  });
+});
+
+testimonialInterval = setInterval(nextTestimonial, 5000);
+
+// ── SMOOTH SCROLL NAV ──────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(anchor.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// ── PARALLAX ON HERO GLOW ──────────────────────
+const heroGlow = document.querySelector('.hero-glow');
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  if (scrolled < window.innerHeight) {
+    heroGlow.style.transform = `translate(-50%, calc(-50% + ${scrolled * 0.3}px))`;
+  }
+});
+
+// ── AUTO-TRIGGER HERO ANIMATIONS ON LOAD ───────
+window.addEventListener('load', () => {
+  document.querySelectorAll('.hero .reveal, .hero .reveal-line').forEach(el => {
+    setTimeout(() => el.classList.add('visible'), 300);
+  });
+});
+</script>
+
+</body>
+</html>
