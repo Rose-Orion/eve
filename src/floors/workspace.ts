@@ -1,6 +1,6 @@
 /**
  * Workspace — manages the file system for each floor's project directory.
- * Each floor gets a Git-versioned workspace under ~/orion-projects/{slug}/.
+ * Each floor gets a Git-versioned workspace under ~/eve-projects/{slug}/.
  */
 
 import { mkdir, readdir, writeFile, readFile, access } from 'node:fs/promises';
@@ -22,9 +22,9 @@ const WORKSPACE_SUBDIRS = [
   'analytics',
   'media',
   'deliverables',
-  '.orion',
-  '.orion/agents',
-  '.orion/gold-standards',
+  '.eve',
+  '.eve/agents',
+  '.eve/gold-standards',
 ];
 
 export class Workspace {
@@ -104,16 +104,16 @@ export class Workspace {
     return join(this.projectsDir, slug);
   }
 
-  /** Create agent directory structure within .orion/agents/. */
+  /** Create agent directory structure within .eve/agents/. */
   async createAgentDir(slug: string, agentRole: string): Promise<string> {
-    const agentDir = join(this.projectsDir, slug, '.orion', 'agents', agentRole);
+    const agentDir = join(this.projectsDir, slug, '.eve', 'agents', agentRole);
     await mkdir(agentDir, { recursive: true });
     return agentDir;
   }
 
   /** Create gold standard directory for an agent task type. */
   async createGoldStandardDir(slug: string, agentId: string, taskType: string): Promise<string> {
-    const dir = join(this.projectsDir, slug, '.orion', 'gold-standards', agentId, taskType);
+    const dir = join(this.projectsDir, slug, '.eve', 'gold-standards', agentId, taskType);
     await mkdir(dir, { recursive: true });
     return dir;
   }

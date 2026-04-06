@@ -29,7 +29,7 @@ const envSchema = z.object({
   TIKTOK_ACCESS_TOKEN: z.string().optional(),
   PORT: z.coerce.number().default(3100),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PROJECTS_DIR: z.string().default(`${process.env['HOME'] ?? '/Users/automation'}/orion-projects`),
+  PROJECTS_DIR: z.string().default(`${process.env['HOME'] ?? '/Users/automation'}/eve-projects`),
 });
 
 export type Config = z.infer<typeof envSchema>;

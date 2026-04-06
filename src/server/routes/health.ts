@@ -144,7 +144,7 @@ export function registerHealthRoutes(app: FastifyInstance, orchestrator: Orchest
     try {
       const { readdir, stat } = await import('node:fs/promises');
       const { join } = await import('node:path');
-      const projectsDir = process.env['PROJECTS_DIR'] || `${process.env['HOME'] ?? '/Users/automation'}/orion-projects`;
+      const projectsDir = process.env['PROJECTS_DIR'] || `${process.env['HOME'] ?? '/Users/automation'}/eve-projects`;
       const floorDir = join(projectsDir, request.params.slug);
 
       async function listRecursive(dir: string, prefix = ''): Promise<string[]> {
@@ -175,7 +175,7 @@ export function registerHealthRoutes(app: FastifyInstance, orchestrator: Orchest
     try {
       const { readFile } = await import('node:fs/promises');
       const { join } = await import('node:path');
-      const projectsDir = process.env['PROJECTS_DIR'] || `${process.env['HOME'] ?? '/Users/automation'}/orion-projects`;
+      const projectsDir = process.env['PROJECTS_DIR'] || `${process.env['HOME'] ?? '/Users/automation'}/eve-projects`;
       const filePath = join(projectsDir, request.params.slug, request.params['*']);
       // Security: prevent path traversal
       if (filePath.includes('..')) return reply.code(400).send({ error: 'Invalid path' });
@@ -191,7 +191,7 @@ export function registerHealthRoutes(app: FastifyInstance, orchestrator: Orchest
     try {
       const { readFile } = await import('node:fs/promises');
       const { join, extname } = await import('node:path');
-      const projectsDir = process.env['PROJECTS_DIR'] || `${process.env['HOME'] ?? '/Users/automation'}/orion-projects`;
+      const projectsDir = process.env['PROJECTS_DIR'] || `${process.env['HOME'] ?? '/Users/automation'}/eve-projects`;
       const filePath = join(projectsDir, request.params.slug, request.params['*']);
       if (filePath.includes('..')) return reply.code(400).send('Invalid path');
       const ext = extname(filePath).toLowerCase();

@@ -13,7 +13,7 @@ function getProjectsDir(): string {
   try {
     return getConfig().PROJECTS_DIR;
   } catch {
-    return join(process.env['HOME'] ?? '/Users/automation', 'orion-projects');
+    return join(process.env['HOME'] ?? '/Users/automation', 'eve-projects');
   }
 }
 

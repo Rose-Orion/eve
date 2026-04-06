@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import type { AgentId, GoldStandardExample } from '../config/types.js';
 import { countTokens, truncateToTokens } from './token-counter.js';
 
-const PROJECTS_DIR = join(process.env['HOME'] ?? '/Users/automation', 'orion-projects');
+const PROJECTS_DIR = join(process.env['HOME'] ?? '/Users/automation', 'eve-projects');
 
 const MAX_EXAMPLES = 3;
 const MAX_TOTAL_TOKENS = 1000;
@@ -23,7 +23,7 @@ export async function loadGoldStandards(
   taskType: string,
 ): Promise<GoldStandardExample[]> {
   const examplesDir = join(
-    PROJECTS_DIR, floorSlug, '.orion', 'gold-standards', agentId, taskType,
+    PROJECTS_DIR, floorSlug, '.eve', 'gold-standards', agentId, taskType,
   );
 
   let files: string[];
@@ -92,7 +92,7 @@ export async function saveGoldStandard(
   const { mkdir, writeFile: fsWriteFile, readdir: fsReaddir, unlink, stat: fsStat } = await import('node:fs/promises');
 
   const examplesDir = join(
-    PROJECTS_DIR, floorSlug, '.orion', 'gold-standards', agentId, taskType,
+    PROJECTS_DIR, floorSlug, '.eve', 'gold-standards', agentId, taskType,
   );
 
   await mkdir(examplesDir, { recursive: true });

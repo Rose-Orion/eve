@@ -112,11 +112,11 @@ export class FloorCreator {
           businessType: input.businessType,
           activeAgents,
         });
-        await this.workspace.writeFile(slug, `.orion/agents/${agentId}/SOUL.md`, soulContent);
+        await this.workspace.writeFile(slug, `.eve/agents/${agentId}/SOUL.md`, soulContent);
 
         // Generate AGENTS.md
         const agentsMd = buildAgentsMd(agentId, activeAgents);
-        await this.workspace.writeFile(slug, `.orion/agents/${agentId}/AGENTS.md`, agentsMd);
+        await this.workspace.writeFile(slug, `.eve/agents/${agentId}/AGENTS.md`, agentsMd);
 
         await registerAgent(`${slug}-${agentId}`, agentId, soulPath, agentDir);
       }
@@ -124,7 +124,7 @@ export class FloorCreator {
     this.agentRegistry.registerFloorAgents(floorId, activeAgents);
 
     // Step 4: Floor Manager workspace files (HEARTBEAT.md, USER.md, IDENTITY.md)
-    const fmAgentPath = `.orion/agents/floor-manager`;
+    const fmAgentPath = `.eve/agents/floor-manager`;
     await this.workspace.writeFile(slug, `${fmAgentPath}/HEARTBEAT.md`,
       `# Floor Manager Heartbeat\n\n## Every 60 seconds (build phase)\n- Check task queue: any blocked or failed tasks?\n- Check agent health: any agents offline?\n- Check budget: any alerts?\n- If nothing needs attention: HEARTBEAT_OK\n\n## Every 5 minutes (post-launch)\n- Check engagement: any urgent DMs or comments?\n- Check ad performance: any campaign below ROAS threshold for 3+ days?\n- Check orders: any issues?\n- If nothing needs attention: HEARTBEAT_OK\n\n## Daily at 7:00 AM\n- Compile daily status report and send to CEO Mode.\n`);
     await this.workspace.writeFile(slug, `${fmAgentPath}/USER.md`,

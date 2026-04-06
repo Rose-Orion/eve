@@ -74,7 +74,7 @@ const DEFAULT_CONFIG: OutcomeGoldStandardConfig = {
   autoReplace: true,
 };
 
-const PROJECTS_DIR = join(process.env['HOME'] ?? '/Users/automation', 'orion-projects');
+const PROJECTS_DIR = join(process.env['HOME'] ?? '/Users/automation', 'eve-projects');
 
 // ─── OutcomeGoldStandards ──────────────────────────────────────────────────
 
@@ -235,7 +235,7 @@ export class OutcomeGoldStandards {
     standards: OutcomeGoldStandard[],
   ): Promise<void> {
     const dir = join(
-      PROJECTS_DIR, floorSlug, '.orion', 'gold-standards', agentId, taskType,
+      PROJECTS_DIR, floorSlug, '.eve', 'gold-standards', agentId, taskType,
     );
     await mkdir(dir, { recursive: true });
 
