@@ -28,6 +28,9 @@ const DEFAULT_ROUTING: Record<AgentId, ModelRoutingConfig> = {
   // System agents
   'dashboard-agent':     { foundation: 'sonnet', routine: 'sonnet', review: 'sonnet', escalation: 'sonnet' },
   'backend-agent':       { foundation: 'sonnet', routine: 'sonnet', review: 'sonnet', escalation: 'opus' },
+  // 'owner' is a pseudo-agent representing the human owner in the AgentId union.
+  // It's not dispatchable — this entry exists only so getModelTier() doesn't throw
+  // when the orchestrator resolves model tiers for owner-assigned review tasks.
   'owner':               { foundation: 'opus',   routine: 'opus',   review: 'opus',   escalation: 'opus' },
 };
 

@@ -7,6 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { AgentId, BrandContext, BrandState } from '../config/types.js';
 import { getConfig } from '../config/index.js';
+import { loadTemplate } from './template-loader.js';
 
 function getProjectsDir(): string {
   try {
@@ -34,8 +35,11 @@ const BRAND_CONTEXT_FIELDS: Record<string, string[]> = {
   'launch-agent': ['technical_requirements', 'target_customer', 'business_model', 'pricing', 'kpis'],
 };
 
-/** Agents that receive the voice sample in their brand context. */
-const VOICE_SAMPLE_AGENTS: Set<string> = new Set([
+/**
+ * Agents that receive the voice sample in their brand context.
+ * Hardcoded fallback — the authoritative check is the template's `usesVoiceSample` flag.
+ */
+const VOICE_SAMPLE_AGENTS_FALLBACK: Set<string> = new Set([
   'copy-agent', 'social-media-agent', 'ads-agent',
 ]);
 
@@ -86,9 +90,18 @@ export async function loadBrandContext(
     extracted = foundationPackage.trim();
   }
 
-  // Load voice sample for content agents
+  // Load voice sample — gated by the template's usesVoiceSample flag.
+  // Falls back to the hardcoded set if template loading fails.
+  let shouldLoadVoice = VOICE_SAMPLE_AGENTS_FALLBACK.has(agentId);
+  try {
+    const tmpl = await loadTemplate(agentId);
+    shouldLoadVoice = tmpl.usesVoiceSample;
+  } catch {
+    // Template load failed — use fallback set
+  }
+
   let voiceSample: string | null = null;
-  if (VOICE_SAMPLE_AGENTS.has(agentId)) {
+  if (shouldLoadVoice) {
     try {
       voiceSample = await readFile(voicePath, 'utf-8');
     } catch {

@@ -1,4 +1,3 @@
-console.log('[SRC-MARKER] src/prompt-builder/index.ts loaded at', new Date().toISOString());
 /**
  * PromptBuilder — Assembles XML-structured system prompts for all EVE agents.
  *
