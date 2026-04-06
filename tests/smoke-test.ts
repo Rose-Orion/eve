@@ -1,7 +1,7 @@
 /**
  * EVE Orchestrator Smoke Test
  * Run with: npx tsx tests/smoke-test.ts
- * Requires: Orchestrator running on localhost:3000
+ * Requires: Orchestrator running on localhost:3100 (or PORT env var)
  */
 
 interface TestResult {
@@ -11,7 +11,7 @@ interface TestResult {
   responseTime?: number;
 }
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = `http://localhost:${process.env['PORT'] ?? 3100}`;
 const results: TestResult[] = [];
 
 // Utility: colored output

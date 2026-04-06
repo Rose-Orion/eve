@@ -63,6 +63,7 @@ export class FloorCreator {
     private taskManager: TaskManager,
     private agentRegistry: AgentRegistry,
     private lifecycle: FloorLifecycle,
+    private modelRouter: ModelRouter = new ModelRouter(),
   ) {}
 
   async create(input: CreateFloorInput): Promise<Floor> {
@@ -75,7 +76,7 @@ export class FloorCreator {
       name: input.name,
       slug,
       goal: input.goal,
-      status: 'building',
+      status: 'planning',  // Start in 'planning' per FloorStatus contract; transitions to 'building' below
       brandState: 'pre-foundation',
       selectedBrand: null,
       themeConfig: null,
@@ -136,20 +137,23 @@ export class FloorCreator {
     // Phases 1 (Idea Evaluation) and 2 (Floor Initialization) have no tasks —
     // they represent the steps we just completed (floor creation + workspace setup).
     // Mark them done so the phase manager doesn't block on empty phases.
-    this.lifecycle.init(floorId, 'building');
+    this.lifecycle.init(floorId, 'planning');
     this.phaseManager.initFloor(floorId);
     this.phaseManager.forceCompleteUpTo(floorId, 2);
     this.phaseManager.activatePhase(floorId, 3);
     floor.currentPhase = 3;
 
+    // Transition planning → building now that phases are set up
+    floor.status = 'building';
+    this.lifecycle.transition(floorId, 'building');
+
     // Step 6: Dispatch Foundation Sprint tasks
-    const router = new ModelRouter();
 
     this.taskManager.create({
       floorId,
       phaseNumber: 3,
       assignedAgent: 'brand-agent',
-      modelTier: router.getModelTier('brand-agent', 'foundation'),
+      modelTier: this.modelRouter.getModelTier('brand-agent', 'foundation'),
       taskType: 'brand-options',
       description: `Create 3 distinct brand direction options for "${input.name}": ${input.goal}`,
       prompt: `Create 3 distinct brand direction options for "${input.name}". Goal: ${input.goal}
@@ -182,7 +186,7 @@ DO NOT use numbered headings, bold-only headings, em-dashes, or any format other
       floorId,
       phaseNumber: 3,
       assignedAgent: 'strategy-agent',
-      modelTier: router.getModelTier('strategy-agent', 'foundation'),
+      modelTier: this.modelRouter.getModelTier('strategy-agent', 'foundation'),
       taskType: 'business-strategy',
       description: `Develop go-to-market strategy for "${input.name}": ${input.goal}`,
       prompt: `Develop a go-to-market strategy for "${input.name}". Business goal: ${input.goal}
@@ -201,7 +205,7 @@ Be specific to this business — not generic advice. Calibrate recommendations t
       floorId,
       phaseNumber: 3,
       assignedAgent: 'finance-agent',
-      modelTier: router.getModelTier('finance-agent', 'foundation'),
+      modelTier: this.modelRouter.getModelTier('finance-agent', 'foundation'),
       taskType: 'budget-plan',
       description: `Build financial plan for "${input.name}": ${input.goal}`,
       prompt:

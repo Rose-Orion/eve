@@ -1,7 +1,14 @@
 /**
  * TokenManager — manages OAuth token lifecycle for Meta and TikTok.
  * Stores tokens with expiry timestamps, refreshes automatically 7 days before expiry.
- * Tokens are persisted to Supabase floor_tokens table.
+ *
+ * WARNING: Tokens are currently in-memory only. On server restart, all stored
+ * OAuth tokens (Meta, TikTok) are lost and floors lose their integrations
+ * until manually reconnected.
+ *
+ * TODO: Persist tokens to Supabase floor_tokens table. On start(), load all
+ * tokens from the table. On setToken(), write-through to Supabase. This ensures
+ * tokens survive restarts and PM2 process cycling.
  */
 
 import type { EventBus } from '../orchestrator/event-bus.js';

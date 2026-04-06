@@ -2,11 +2,24 @@
 // Single-page app with view-based routing, live API polling, glassmorphism UI
 
 const API   = '';   // same origin
-const TOKEN = 'eve-dev-key-change-in-production';
+
+// Session token obtained via magic link or dev fallback.
+// In production, the magic link flow sets this via URL param → sessionStorage.
+// In dev mode (no EVE_API_KEY env), auth is skipped server-side.
+// NEVER ship a hardcoded key here — the frontend JS is publicly readable.
+const TOKEN = new URLSearchParams(window.location.search).get('token')
+  || sessionStorage.getItem('eve-session-token')
+  || '';
+
+// Persist token from magic link URL into sessionStorage, then strip from URL
+if (new URLSearchParams(window.location.search).get('token')) {
+  sessionStorage.setItem('eve-session-token', TOKEN);
+  window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+}
 
 const headers = {
   'Content-Type': 'application/json',
-  'Authorization': `Bearer ${TOKEN}`,
+  ...(TOKEN ? { 'Authorization': `Bearer ${TOKEN}` } : {}),
 };
 
 // ── Router ───────────────────────────────────────────────────────────────

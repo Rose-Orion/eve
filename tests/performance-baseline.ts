@@ -1,7 +1,7 @@
 /**
  * EVE Performance Baseline
  * Run with: npx tsx tests/performance-baseline.ts
- * Requires: Orchestrator running on localhost:3000
+ * Requires: Orchestrator running on localhost:3100 (or PORT env var)
  *
  * Measures response times and memory usage for key endpoints.
  */
@@ -34,7 +34,7 @@ interface BaselineReport {
   failedTests: number;
 }
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = `http://localhost:${process.env['PORT'] ?? 3100}`;
 const REQUESTS_PER_ENDPOINT = 10;
 const ENDPOINTS = [
   '/api/health',

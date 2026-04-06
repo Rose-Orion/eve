@@ -17,7 +17,12 @@ import type { Orchestrator } from '../../orchestrator/index.js';
 import { getConfig } from '../../config/index.js';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-// Track processed event IDs to prevent double-processing
+// Track processed event IDs to prevent double-processing.
+// WARNING: In-memory only — after a server restart, the same webhook event could
+// be processed twice (duplicate orders, double fulfillment). Stripe recommends
+// persisting idempotency keys.
+// TODO: Move to Redis SET with 48h TTL (`SADD eve:processed-events {id}` + EXPIRE)
+// so idempotency survives restarts and auto-cleans. Redis is already running.
 const processedEvents = new Set<string>();
 const MAX_PROCESSED_EVENTS = 10_000;
 

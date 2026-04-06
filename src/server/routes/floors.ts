@@ -4,6 +4,18 @@
 
 import type { FastifyInstance } from 'fastify';
 import type { Orchestrator } from '../../orchestrator/index.js';
+import { z } from 'zod';
+
+const VALID_BUSINESS_TYPES = ['ecommerce', 'service', 'content', 'personal-brand'] as const;
+
+const createFloorSchema = z.object({
+  name: z.string().min(1, 'Floor name is required').max(100, 'Floor name too long'),
+  goal: z.string().min(1, 'Goal is required').max(2000, 'Goal too long (max 2000 chars — it gets embedded in every agent prompt)'),
+  businessType: z.enum(VALID_BUSINESS_TYPES, {
+    errorMap: () => ({ message: `businessType must be one of: ${VALID_BUSINESS_TYPES.join(', ')}` }),
+  }),
+  budgetCeilingCents: z.number().int().min(100, 'Budget must be at least $1.00').max(100_000_00, 'Budget cannot exceed $100,000'),
+});
 
 export function registerFloorRoutes(app: FastifyInstance, orchestrator: Orchestrator): void {
   app.get('/api/floors', async () => {
@@ -15,12 +27,19 @@ export function registerFloorRoutes(app: FastifyInstance, orchestrator: Orchestr
 
   app.post<{
     Body: { name: string; goal: string; businessType: string; budgetCeilingCents: number };
-  }>('/api/floors', async (request) => {
-    const { name, goal, businessType, budgetCeilingCents } = request.body;
+  }>('/api/floors', async (request, reply) => {
+    const parsed = createFloorSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.code(400).send({
+        error: 'Validation failed',
+        details: parsed.error.issues.map(i => ({ field: i.path.join('.'), message: i.message })),
+      });
+    }
+    const { name, goal, businessType, budgetCeilingCents } = parsed.data;
     const floor = await orchestrator.createFloor({
       name,
       goal,
-      businessType: businessType as 'ecommerce' | 'service' | 'content' | 'personal-brand',
+      businessType,
       budgetCeilingCents,
     });
     return floor;
