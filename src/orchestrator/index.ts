@@ -5051,20 +5051,18 @@ You also actively monitor this floor's workflows and communicate with EVE (the c
       }
     }
 
-    // Anti-slop check — use template's antiSlopEnabled flag instead of hardcoded agent list
-    // EXEMPT: Strategic/brand tasks (brand-options, business-strategy) naturally use words
-    // like "elevate" and "leverage" in legitimate brand positioning context. Only apply
-    // anti-slop to customer-facing copy tasks (product descriptions, social posts, ads).
+    // Anti-slop check — use template's antiSlopEnabled flag instead of hardcoded agent list.
+    // EXEMPT only internal/strategic tasks where words like "elevate" and "leverage" are
+    // legitimate (brand positioning, strategy docs, internal reviews). Customer-facing
+    // outputs (product descriptions, social posts, ads, emails, website copy) are the
+    // primary targets of anti-slop and must NOT be exempted.
     const ANTI_SLOP_EXEMPT_TASKS = new Set([
+      // Internal strategy tasks — these legitimately use marketing terminology
       'brand-options', 'business-strategy', 'budget-plan', 'strategy-revision',
-      // Review tasks naturally reference slop words when critiquing copy — exempt them
+      // Review tasks naturally reference slop words when critiquing copy
       'copy-review', 'staging-review', 'content-review', 'qa-review',
-      // Ad/campaign tasks discuss marketing concepts that overlap with slop words
-      'ad-creative-production', 'ad-campaign-setup', 'campaign-plan', 'conversion-tracking',
-      // Creative/build tasks — contain image generation prompts and marketing copy
-      'product-images', 'social-media-graphics', 'website-homepage',
-      // Email sequences — marketing copy naturally uses persuasive language
-      'email-welcome-sequence', 'email-sequence', 'email-campaign',
+      // Campaign planning (not creative output) — discusses concepts, not customer-facing copy
+      'campaign-plan', 'conversion-tracking', 'analytics-setup', 'performance-review',
     ]);
     const agentTemplate = await this.loadAgentTemplate(task.assignedAgent);
     if (agentTemplate?.antiSlopEnabled && !ANTI_SLOP_EXEMPT_TASKS.has(task.taskType)) {
@@ -5082,19 +5080,21 @@ You also actively monitor this floor's workflows and communicate with EVE (the c
       }
     }
 
-    // Generated Knowledge format validation — only for analytical task types
+    // Generated Knowledge format validation — only for analytical task types.
+    // NOTE: Phase 1 (fact generation) is now handled by VirtualDispatcher's two-phase
+    // dispatch — it runs as a separate API call and gets injected as conversation history.
+    // The agent's output only needs Phase 2 (analysis) and Phase 3 (recommendations).
     const ANALYTICAL_TASK_TYPES = new Set([
       'business-strategy', 'budget-plan', 'analytics-setup', 'performance-review',
       'growth-report', 'ad-optimization', 'strategy-revision', 'launch-ad-campaign',
     ]);
     if (agentTemplate?.usesGeneratedKnowledge && ANALYTICAL_TASK_TYPES.has(task.taskType) && task.attempts < 1) {
-      const hasPhase1 = /phase\s*1|facts?:|what\s+do\s+we\s+know|market\s*research|data\s*points|key\s*findings/i.test(result.content);
       const hasPhase2 = /phase\s*2|analysis:|reason|assessment|evaluation|implications/i.test(result.content);
       const hasPhase3 = /phase\s*3|recommend|proposal|action\s*plan|strategic\s*plan|next\s*steps|conclusion/i.test(result.content);
-      if (!hasPhase1 || !hasPhase2 || !hasPhase3) {
-        const missing = [!hasPhase1 && 'Phase 1 (Facts)', !hasPhase2 && 'Phase 2 (Analysis)', !hasPhase3 && 'Phase 3 (Recommendations)'].filter(Boolean).join(', ');
+      if (!hasPhase2 || !hasPhase3) {
+        const missing = [!hasPhase2 && 'Phase 2 (Analysis)', !hasPhase3 && 'Phase 3 (Recommendations)'].filter(Boolean).join(', ');
         console.log(`[Orchestrator] Generated Knowledge format missing ${missing} in ${task.assignedAgent}:${task.taskType} — retrying`);
-        task.revisionNote = `FORMAT REVISION: Your output must follow the Generated Knowledge pattern with clearly labeled phases:\nPhase 1: Generate facts (what do we know?)\nPhase 2: Reason using ONLY those facts\nPhase 3: Recommend with expected impact, timeline, risk, and rollback plan.\nYour previous output was missing: ${missing}. Please restructure with all 3 phases clearly labeled.`;
+        task.revisionNote = `FORMAT REVISION: Your output must follow the Generated Knowledge pattern with clearly labeled phases:\nPhase 2: Reason and analyze using the facts provided\nPhase 3: Recommend with expected impact, timeline, risk, and rollback plan.\nYour previous output was missing: ${missing}. Please restructure with both phases clearly labeled.`;
         this.taskManager.recordFailure(task.id, `Generated Knowledge format missing: ${missing}`);
         return;
       }

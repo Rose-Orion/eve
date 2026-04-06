@@ -63,7 +63,7 @@ export function parseAgentOutput(agentId: string, taskType: string, rawOutput: s
   if (agentId === 'commerce-agent' && taskType.includes('product')) {
     return { type: 'product-catalog', data: parseProductCatalog(rawOutput, jsonMatch?.[1]) };
   }
-  if ((agentId === 'email-agent' || agentId === 'copy-agent') && taskType.includes('email')) {
+  if (agentId === 'copy-agent' && taskType.includes('email')) {
     return { type: 'email-sequence', data: parseEmailSequence(rawOutput, jsonMatch?.[1]) };
   }
 
